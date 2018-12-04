@@ -28,8 +28,16 @@ int main(int argc, const char * argv[]) {
         printTable(table);
         printf("Player 1, input coordinates\nEnter row ");
         scanf("%d", &row);
+        while(row > 2 || row < 0){
+            printf("Invalid input for row, please select a number between 0 and 2 ");
+            scanf("%d", &row);
+        }
         printf("Enter column ");
         scanf("%d", &column);
+        while(column > 2 || column < 0){
+            printf("Invalid input for column, please select a number between 0 and 2 ");
+            scanf("%d", &column);
+        }
         table[row][column]= 'x';
         isWinner(table, &win1, 'x');
         
@@ -37,14 +45,26 @@ int main(int argc, const char * argv[]) {
             printTable(table);
             printf("Player 2, input coordinates\nEnter row ");
             scanf("%d", &row);
+            while(row > 2 || row < 0){
+                printf("Invalid input for row, please select a number between 0 and 2 ");
+                scanf("%d", &row);
+            }
             printf("Enter column ");
             scanf("%d", &column);
+            while(column > 2 || column < 0){
+                printf("Invalid input for column, please select a number between 0 and 2 ");
+                scanf("%d", &column);
+            }
             table[row][column]= 'o';
-            isWinner(table, &win1, 'o');
+            isWinner(table, &win2, 'o');
         }
 
     }
     printTable(table);
+    if(win1 == true)
+        printf("Player1 has won!");
+    else
+        printf("Player2 has won!");
 }
 
 void printTable(char table[3][3]){
