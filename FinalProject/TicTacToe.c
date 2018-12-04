@@ -12,6 +12,7 @@
 //prototypes
 void printTable(char[3][3]);
 void isWinner(char[3][3], bool*, char);
+bool isRoom(char[3][3]);
 
 bool win1 = false;
 bool win2 = false;
@@ -21,10 +22,11 @@ int main(int argc, const char * argv[]) {
     char table[3][3] = {{'?', '?', '?'},{'?','?','?'},{'?','?','?'}};
     //first number is row, second is column
     int row = -1, column = -1;
+    bool room = true;
 
     printTable(table);
 
-    while(winner == false){
+    while(winner == false && room){
         printTable(table);
         printf("Player 1, input coordinates\nEnter row ");
         scanf("%d", &row);
@@ -40,8 +42,9 @@ int main(int argc, const char * argv[]) {
         }
         table[row][column]= 'x';
         isWinner(table, &win1, 'x');
+        room = isRoom(table);
         
-        if(win1 == false){
+        if(win1 == false && room){
             printTable(table);
             printf("Player 2, input coordinates\nEnter row ");
             scanf("%d", &row);
@@ -63,8 +66,10 @@ int main(int argc, const char * argv[]) {
     printTable(table);
     if(win1 == true)
         printf("Player1 has won!");
-    else
+    else if(win2 == true)
         printf("Player2 has won!");
+    else
+        printf("It's a draw");
 }
 
 void printTable(char table[3][3]){
@@ -98,4 +103,14 @@ void isWinner(char table[3][3], bool *won, char sym){
         *won = true;
         winner = true;
     }
+}
+
+bool isRoom(char table[3][3]){
+    for(int i = 0;i < 3; i++){
+        for(int j = 0; j < 3;j++){
+            if(table[i][j] == '?')
+                return true;
+        }
+    }
+    return false;
 }
