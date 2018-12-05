@@ -13,7 +13,9 @@
 void printTable(char[3][3]);
 void isWinner(char[3][3], bool*, char);
 bool isRoom(char[3][3]);
+bool taken(int, int, char[3][3]);
 
+//variables
 bool win1 = false;
 bool win2 = false;
 bool winner = false;
@@ -25,20 +27,40 @@ int main(int argc, const char * argv[]) {
     bool room = true;
 
     printTable(table);
-
+    //plays the game
     while(winner == false && room){
         printTable(table);
         printf("Player 1, input coordinates\nEnter row ");
         scanf("%d", &row);
+        //checks row is a valid number
         while(row > 2 || row < 0){
             printf("Invalid input for row, please select a number between 0 and 2 ");
             scanf("%d", &row);
         }
         printf("Enter column ");
         scanf("%d", &column);
+        //checks column is valid number
         while(column > 2 || column < 0){
             printf("Invalid input for column, please select a number between 0 and 2 ");
             scanf("%d", &column);
+        }
+        //checks if position is already taken
+        while(taken(row, column, table)){
+            printf("That position is taken, try again\n");
+            printf("Player 1, input coordinates\nEnter row ");
+            scanf("%d", &row);
+            //checks row is valid number
+            while(row > 2 || row < 0){
+                printf("Invalid input for row, please select a number between 0 and 2 ");
+                scanf("%d", &row);
+            }
+            printf("Enter column ");
+            scanf("%d", &column);
+            //checks column is valid number
+            while(column > 2 || column < 0){
+                printf("Invalid input for column, please select a number between 0 and 2 ");
+                scanf("%d", &column);
+            }
         }
         table[row][column]= 'x';
         isWinner(table, &win1, 'x');
@@ -48,15 +70,35 @@ int main(int argc, const char * argv[]) {
             printTable(table);
             printf("Player 2, input coordinates\nEnter row ");
             scanf("%d", &row);
+            //checks row is valid number
             while(row > 2 || row < 0){
                 printf("Invalid input for row, please select a number between 0 and 2 ");
                 scanf("%d", &row);
             }
             printf("Enter column ");
             scanf("%d", &column);
+            //checks column is valid number
             while(column > 2 || column < 0){
                 printf("Invalid input for column, please select a number between 0 and 2 ");
                 scanf("%d", &column);
+            }
+            //checks if position is already taken
+            while(taken(row, column, table)){
+                printf("That position is taken, try again\n");
+                printf("Player 2, input coordinates\nEnter row ");
+                scanf("%d", &row);
+                //checks row is valid number
+                while(row > 2 || row < 0){
+                    printf("Invalid input for row, please select a number between 0 and 2 ");
+                    scanf("%d", &row);
+                }
+                printf("Enter column ");
+                scanf("%d", &column);
+                //checks column is valid number
+                while(column > 2 || column < 0){
+                    printf("Invalid input for column, please select a number between 0 and 2 ");
+                    scanf("%d", &column);
+                }
             }
             table[row][column]= 'o';
             isWinner(table, &win2, 'o');
@@ -65,11 +107,11 @@ int main(int argc, const char * argv[]) {
     }
     printTable(table);
     if(win1 == true)
-        printf("Player1 has won!");
+        printf("Player1 has won!\n");
     else if(win2 == true)
-        printf("Player2 has won!");
+        printf("Player2 has won!\n");
     else
-        printf("It's a draw");
+        printf("It's a draw\n");
 }
 
 void printTable(char table[3][3]){
@@ -113,4 +155,11 @@ bool isRoom(char table[3][3]){
         }
     }
     return false;
+}
+
+bool taken(int row, int column, char table[3][3]){
+    if(table[row][column] == '?')
+        return false;
+    else
+        return true;
 }
