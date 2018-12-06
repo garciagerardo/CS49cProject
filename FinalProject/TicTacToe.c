@@ -26,7 +26,6 @@ int main(int argc, const char * argv[]) {
     int row = -1, column = -1;
     bool room = true;
 
-    printTable(table);
     //plays the game
     while(winner == false && room){
         printTable(table);
