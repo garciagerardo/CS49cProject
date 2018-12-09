@@ -21,11 +21,7 @@ void getInputs(int*, int*);
 void printStats(void);
 void getShortestLongestGame(void);
 void bubbleSort(int moves[], int games[], int size);
-
-void playFakeGameShort(void);
-void playFakeGame1(void);
-void playFakeGame2(void);
-void playFakeGameD(void);
+void playFakeGames(char input);
 
 //variables
 bool win1 = false;
@@ -52,13 +48,13 @@ int main(int argc, const char * argv[]) {
         //playTheGame();
         
         if(i == 5)
-            playFakeGameShort();
+            playFakeGames('S');
         else if(i == 1)
-            playFakeGameD();
+            playFakeGames('D');
         else if(i % 2 == 0)
-            playFakeGame1();
+            playFakeGames('A');
         else
-            playFakeGame2();
+            playFakeGames('B');
         
         movesCount[i-1] = moves;
         
@@ -265,23 +261,67 @@ void bubbleSort(int moves[], int games[], int size)
 
 
 /*
- 
     FOR TESTING ONLY
- 
  */
-void playFakeGameShort()
+
+void playFakeGames(char input)
 {
-    //plays a fake game where P1 wins
-    
     char table[3][3] = {{'?', '?', '?'},{'?','?','?'},{'?','?','?'}};
     
-    table[2][2]= 'x';
-    table[0][0]= 'o';
-    table[0][2]= 'x';
-    table[1][1]= 'o';
-    table[1][2]= 'x';
+    if(input == 'A')
+    {
+        //plays a fake game where P1 wins
+        table[1][1]= 'x';
+        table[0][0]= 'o';
+        table[0][2]= 'x';
+        table[2][0]= 'o';
+        table[1][0]= 'x';
+        table[0][1]= 'o';
+        table[1][2]= 'x';
+        
+        moves = 7;
+    }
+    else if(input == 'B')
+    {
+        //plays a fake game where P2 wins
+        table[2][2]= 'x';
+        table[0][0]= 'o';
+        table[1][1]= 'x';
+        table[0][2]= 'o';
+        table[2][0]= 'x';
+        table[0][1]= 'o';
+        
+        moves = 6;
+    }
+    else if(input == 'S')
+    {
+        //plays a fake game where P1 wins and it's short
+        table[2][2]= 'x';
+        table[0][0]= 'o';
+        table[0][2]= 'x';
+        table[1][1]= 'o';
+        table[1][2]= 'x';
+        
+        moves = 5;
+    }
+    else if(input == 'D')
+    {
+        //plays a fake game where they draw
+        table[1][1]= 'x';
+        table[0][0]= 'o';
+        table[0][2]= 'x';
+        table[2][0]= 'o';
+        table[1][0]= 'x';
+        table[1][2]= 'o';
+        table[0][1]= 'x';
+        table[2][1]= 'o';
+        table[2][2]= 'x';
+        
+        moves = 9;
+    }
+    else
+        puts("something went wrong");
     
-    moves = 5;
     
     isWinner(table, &win1, 'x');
     isWinner(table, &win2, 'o');
@@ -303,117 +343,3 @@ void playFakeGameShort()
         drawCount++;
     }
 }
-
-void playFakeGame1()
-{
-    //plays a fake game where P1 wins
-    
-    char table[3][3] = {{'?', '?', '?'},{'?','?','?'},{'?','?','?'}};
-    
-    table[1][1]= 'x';
-    table[0][0]= 'o';
-    table[0][2]= 'x';
-    table[2][0]= 'o';
-    table[1][0]= 'x';
-    table[0][1]= 'o';
-    table[1][2]= 'x';
-    
-    moves = 7;
-    
-    isWinner(table, &win1, 'x');
-    isWinner(table, &win2, 'o');
-    
-    printTable(table);
-    if(win1 == true)
-    {
-        printf("Player1 has won!\n");
-        player1WinCount++;
-    }
-    else if(win2 == true)
-    {
-        printf("Player2 has won!\n");
-        player2WinCount++;
-    }
-    else
-    {
-        printf("It's a draw\n");
-        drawCount++;
-    }
-}
-
-
-void playFakeGame2()
-{
-    //plays a fake game where P2 wins
-    
-    char table[3][3] = {{'?', '?', '?'},{'?','?','?'},{'?','?','?'}};
-    
-    table[2][2]= 'x';
-    table[0][0]= 'o';
-    table[1][1]= 'x';
-    table[0][2]= 'o';
-    table[2][0]= 'x';
-    table[0][1]= 'o';
-    
-    moves = 6;
-    
-    isWinner(table, &win1, 'x');
-    isWinner(table, &win2, 'o');
-    
-    printTable(table);
-    if(win1 == true)
-    {
-        printf("Player1 has won!\n");
-        player1WinCount++;
-    }
-    else if(win2 == true)
-    {
-        printf("Player2 has won!\n");
-        player2WinCount++;
-    }
-    else
-    {
-        printf("It's a draw\n");
-        drawCount++;
-    }
-}
-
-void playFakeGameD()
-{
-    //plays a fake game where they draw
-    
-    char table[3][3] = {{'?', '?', '?'},{'?','?','?'},{'?','?','?'}};
-    
-    table[1][1]= 'x';
-    table[0][0]= 'o';
-    table[0][2]= 'x';
-    table[2][0]= 'o';
-    table[1][0]= 'x';
-    table[1][2]= 'o';
-    table[0][1]= 'x';
-    table[2][1]= 'o';
-    table[2][2]= 'x';
-    
-    moves = 9;
-    
-    isWinner(table, &win1, 'x');
-    isWinner(table, &win2, 'o');
-    
-    printTable(table);
-    if(win1 == true)
-    {
-        printf("Player1 has won!\n");
-        player1WinCount++;
-    }
-    else if(win2 == true)
-    {
-        printf("Player2 has won!\n");
-        player2WinCount++;
-    }
-    else
-    {
-        printf("It's a draw\n");
-        drawCount++;
-    }
-}
-
