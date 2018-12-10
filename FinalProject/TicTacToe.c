@@ -2,12 +2,13 @@
 //  main.c
 //  Final Project
 //
-//  Created by Jerry Garcia on 12/4/18.
+//  By: Jerry Garcia and Marietta Asemwota
 //  Copyright © 2018 Jerry Garcia. All rights reserved.
-//
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#define SIZE 80 //for the stack
 
 //prototypes
 void playTheGame(void);
@@ -18,9 +19,11 @@ bool isRoom(char[3][3]);
 bool taken(int, int, char[3][3]);
 void getInputs(int*, int*);
 
+//the analysis part
 void printStats(void);
 void getShortestLongestGame(void);
 void bubbleSort(int moves[], int games[], int size);
+void printMoves(int game);
 void playFakeGames(char input);
 
 //variables
@@ -35,10 +38,27 @@ int drawCount = 0;
 int movesCount[10];
 int moves;
 
+// the stack part
+struct stackNode {
+    struct stackNode *nextPtr; // stackNode pointer
+    int data[]; // define data as an int array
+};
+
+typedef struct stackNode StackNode; // synonym for struct stackNode
+typedef StackNode *StackNodePtr; // synonym for StackNode*
+
+// prototypes
+void push(StackNodePtr *topPtr, int*);
+int *pop(StackNodePtr *topPtr);
+int isEmpty(StackNodePtr topPtr);
+void printStack(StackNodePtr currentPtr);
+
+StackNodePtr stackPtr;
+StackNodePtr gameMoves[10]; //array of each game stack
+
 
 int main(int argc, const char * argv[]) {
     puts("Welcome to Tic Tac Toe");
-    
     ///*
     puts("This will be a 10 round tournament");
     
@@ -56,7 +76,8 @@ int main(int argc, const char * argv[]) {
         else
             playFakeGames('B');
         
-        movesCount[i-1] = moves;
+        movesCount[i-1] = moves; //keep track of how many moves this round
+        gameMoves[i-1] = stackPtr; //keep track of the moves for this round
         
         printf("moves: %d\n", moves);
         
@@ -67,8 +88,8 @@ int main(int argc, const char * argv[]) {
     //statistics part
     printStats();
     getShortestLongestGame();
-    
-   //*/
+
+    //*/
     
 //    playTheGame();
 //    printf("moves: %d\n", moves);
@@ -80,6 +101,9 @@ void playTheGame()
     //first number is row, second is column
     int row = -1, column = -1;
     bool room = true;
+
+    //initialize the stack
+    stackPtr = NULL; // points to stack top
     
     //plays the game
     while(winner == false && room){
@@ -94,7 +118,10 @@ void playTheGame()
             getInputs(&row, &column);
         }
         table[row][column]= 'x';
+        int move[] = {'x', row, column};
+        push(&stackPtr, move);
         moves++;
+        
         isWinner(table, &win1, 'x');
         room = isRoom(table);
         
@@ -110,6 +137,8 @@ void playTheGame()
                 getInputs(&row, &column);
             }
             table[row][column]= 'o';
+            int move[] = {'o', row, column};
+            push(&stackPtr, move);
             moves++;
             isWinner(table, &win2, 'o');
         }
@@ -225,15 +254,13 @@ void getShortestLongestGame()
     int shortestGame = gameOrder[0];
     
     printf("Shortest game was game %d with %d moves \n", shortestGame, shortestMoves);
-    //print the moves for the shortest game
-    
+    printMoves(shortestGame); //print the moves for the shortest game
     
     int longestMoves = movesCount[9];
     int longestGame = gameOrder[9];
     
     printf("Longest game was game %d with %d moves \n", longestGame, longestMoves);
-    
-    //print the moves for the longest game
+    printMoves(longestGame); //print the moves for the longest game
 }
 
 void bubbleSort(int moves[], int games[], int size)
@@ -258,6 +285,109 @@ void bubbleSort(int moves[], int games[], int size)
     }
 }
 
+/**
+ For the given game, print the moves for that game in a table
+ */
+void printMoves(int game)
+{
+    StackNodePtr myStackPtr = gameMoves[game-1]; //get the game moves stack
+    //printStack(myStackPtr);  //-- for testing
+    
+    char table[3][3] = {{'?', '?', '?'},{'?','?','?'},{'?','?','?'}};
+    
+    //place the moves back onto a table
+    while (!isEmpty(myStackPtr)) {
+        int *move = pop(&myStackPtr);
+        char c =  move[0];
+        int row = move[1];
+        int column = move[2];
+        
+        table[row][column]= c;
+    }
+    
+    //find out who won that game
+    isWinner(table, &win1, 'x');
+    isWinner(table, &win2, 'o');
+    
+    printTable(table);
+    if(win1 == true)
+    {
+        printf("Which Player1 won\n\n");
+        player1WinCount++;
+    }
+    else if(win2 == true)
+    {
+        printf("Which Player2 won\n\n");
+        player2WinCount++;
+    }
+    else
+    {
+        printf("Which was a draw\n\n");
+        drawCount++;
+    }
+    
+    resetTheGame();
+}
+
+
+
+// insert a node at the stack top
+void push(StackNodePtr *topPtr, int info[])
+{
+    StackNodePtr newPtr = malloc(sizeof(StackNode) + 18 * sizeof(int)); //array stored inside struct
+    
+    // insert the node at stack top
+    if (newPtr != NULL) {
+        newPtr->data[0] = info[0];
+        newPtr->data[1] = info[1];
+        newPtr->data[2] = info[2];
+        newPtr->nextPtr = *topPtr;
+        *topPtr = newPtr;
+    }
+    else { // no space available
+        printf("%d not inserted. No memory available.\n", *info);
+    }
+}
+
+// remove a node from the stack top
+int *pop(StackNodePtr *topPtr)
+{
+    StackNodePtr tempPtr = *topPtr;
+    int *popValue = (*topPtr)->data;
+    *topPtr = (*topPtr)->nextPtr;
+    free(tempPtr);
+    return popValue;
+}
+
+// print the stack
+void printStack(StackNodePtr currentPtr)
+{
+    // if stack is empty
+    if (currentPtr == NULL) {
+        puts("The stack is empty.\n");
+    }
+    else {
+        puts("The stack is:");
+        
+        // while not the end of the stack
+        while (currentPtr != NULL) {
+            int *move = &(*currentPtr->data);
+            char c =  move[0];
+            printf("%c ", c);
+            printf("%d ", move[1]);
+            printf("%d --> ", move[2]);
+            currentPtr = currentPtr->nextPtr;
+        }
+        
+        puts("NULL\n");
+    }
+}
+
+// return 1 if the stack is empty, 0 otherwise
+int isEmpty(StackNodePtr topPtr)
+{
+    return topPtr == NULL;
+}
 
 
 /*
@@ -268,54 +398,115 @@ void playFakeGames(char input)
 {
     char table[3][3] = {{'?', '?', '?'},{'?','?','?'},{'?','?','?'}};
     
+    //initialize the stack
+    stackPtr = NULL; // points to stack top
+    
     if(input == 'A')
     {
         //plays a fake game where P1 wins
-        table[1][1]= 'x';
-        table[0][0]= 'o';
-        table[0][2]= 'x';
-        table[2][0]= 'o';
-        table[1][0]= 'x';
-        table[0][1]= 'o';
-        table[1][2]= 'x';
+        table[1][1]= 'x'; //1
+        table[0][0]= 'o'; //2
+        table[0][2]= 'x'; //3
+        table[2][0]= 'o'; //4
+        table[1][0]= 'x'; //5
+        table[0][1]= 'o'; //6
+        table[1][2]= 'x'; //7
+        
+        int move[] = {'x', 1, 1};
+        push(&stackPtr, move);
+        int move2[] = {'o', 0, 0};
+        push(&stackPtr, move2);
+        int move3[] = {'x', 0, 2};
+        push(&stackPtr, move3);
+        int move4[] = {'o', 2, 0};
+        push(&stackPtr, move4);
+        int move5[] = {'x', 1, 0};
+        push(&stackPtr, move5);
+        int move6[] = {'o', 0, 1};
+        push(&stackPtr, move6);
+        int move7[] = {'x', 1, 2};
+        push(&stackPtr, move7);
         
         moves = 7;
     }
     else if(input == 'B')
     {
         //plays a fake game where P2 wins
-        table[2][2]= 'x';
-        table[0][0]= 'o';
-        table[1][1]= 'x';
-        table[0][2]= 'o';
-        table[2][0]= 'x';
-        table[0][1]= 'o';
+        table[2][2]= 'x'; //1
+        table[0][0]= 'o'; //2
+        table[1][1]= 'x'; //3
+        table[0][2]= 'o'; //4
+        table[2][0]= 'x'; //5
+        table[0][1]= 'o'; //6
+        
+        int move1[] = {'x', 2, 2};
+        push(&stackPtr, move1);
+        int move2[] = {'o', 0, 0};
+        push(&stackPtr, move2);
+        int move3[] = {'x', 1, 1};
+        push(&stackPtr, move3);
+        int move4[] = {'o', 0, 2};
+        push(&stackPtr, move4);
+        int move5[] = {'x', 2, 0};
+        push(&stackPtr, move5);
+        int move6[] = {'o', 0, 1};
+        push(&stackPtr, move6);
         
         moves = 6;
     }
     else if(input == 'S')
     {
         //plays a fake game where P1 wins and it's short
-        table[2][2]= 'x';
-        table[0][0]= 'o';
-        table[0][2]= 'x';
-        table[1][1]= 'o';
-        table[1][2]= 'x';
+        table[2][2]= 'x'; //1
+        table[0][0]= 'o'; //2
+        table[0][2]= 'x'; //3
+        table[1][1]= 'o'; //4
+        table[1][2]= 'x'; //5
+        
+        int move1[] = {'x', 2, 2};
+        push(&stackPtr, move1);
+        int move2[] = {'o', 0, 0};
+        push(&stackPtr, move2);
+        int move3[] = {'x', 0, 2};
+        push(&stackPtr, move3);
+        int move4[] = {'o', 1, 1};
+        push(&stackPtr, move4);
+        int move5[] = {'x', 1, 2};
+        push(&stackPtr, move5);
         
         moves = 5;
     }
     else if(input == 'D')
     {
         //plays a fake game where they draw
-        table[1][1]= 'x';
-        table[0][0]= 'o';
-        table[0][2]= 'x';
-        table[2][0]= 'o';
-        table[1][0]= 'x';
-        table[1][2]= 'o';
-        table[0][1]= 'x';
-        table[2][1]= 'o';
-        table[2][2]= 'x';
+        table[1][1]= 'x'; //1
+        table[0][0]= 'o'; //2
+        table[0][2]= 'x'; //3
+        table[2][0]= 'o'; //4
+        table[1][0]= 'x'; //5
+        table[1][2]= 'o'; //6
+        table[0][1]= 'x'; //7
+        table[2][1]= 'o'; //8
+        table[2][2]= 'x'; //9
+        
+        int move1[] = {'x', 1, 1};
+        push(&stackPtr, move1);
+        int move2[] = {'o', 0, 0};
+        push(&stackPtr, move2);
+        int move3[] = {'x', 0, 2};
+        push(&stackPtr, move3);
+        int move4[] = {'o', 2, 0};
+        push(&stackPtr, move4);
+        int move5[] = {'x', 1, 0};
+        push(&stackPtr, move5);
+        int move6[] = {'o', 1, 2};
+        push(&stackPtr, move6);
+        int move7[] = {'x', 0, 1};
+        push(&stackPtr, move7);
+        int move8[] = {'o', 2, 1};
+        push(&stackPtr, move8);
+        int move9[] = {'x', 2, 2};
+        push(&stackPtr, move9);
         
         moves = 9;
     }
@@ -342,4 +533,6 @@ void playFakeGames(char input)
         printf("It's a draw\n");
         drawCount++;
     }
+    
+    //printStack(stackPtr);
 }
